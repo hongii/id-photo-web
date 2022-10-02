@@ -15,14 +15,14 @@ const Home: NextPage = () => (
       <link rel="icon" href="/favicon.ico" />
     </Head>
 
-    <h1 className={styles["screen-reader-only"]}>서비스 소개</h1>
+    <h1 className={styles['screen-reader-only']}>서비스 소개</h1>
 
     <div className={styles.container}>
       <p className={styles.intro}>
         헤어 스타일을 바꾸고 싶으신가요? 지금 바로 시작해 보세요!
       </p>
 
-      <div className={styles["picture-container"]}>
+      <div className={styles['picture-container']}>
         <img
           className={styles.picture1}
           src="/images/picture1.png"
@@ -40,8 +40,8 @@ const Home: NextPage = () => (
         />
       </div>
 
-      <div className={styles["start-btn"]}>
-        <label className={styles["start-btn__label"]} htmlFor="photoUpload">
+      <div className={styles['start-btn']}>
+        <label className={styles['start-btn__label']} htmlFor="photoUpload">
           시작하기
           <input
             type="file"
