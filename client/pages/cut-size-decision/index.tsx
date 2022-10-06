@@ -3,6 +3,7 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
+import styles from './CutSizeDecision.module.css';
 
 const CutSizeDecision: NextPage = () => (
   <div>
@@ -15,7 +16,7 @@ const CutSizeDecision: NextPage = () => (
       />
       <link rel="icon" href="/favicon.ico" />
     </Head>
-    <header>
+    <header className={styles.header}>
       <h1>컷 사이즈</h1>
       <Link href="/hair-decision" passHref>
         <a href="replace">
