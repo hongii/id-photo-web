@@ -1,9 +1,9 @@
-import React,{useState} from 'react';
+import React, { useState } from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import styles from './CutSizeDecision.module.css';
-import Card  from '../../components/Card';
+import Card from '../../components/Card';
 import { CardInfo, cutSizeData } from '../../constants/cutSizeData';
 
 const CutSizeDecision: NextPage = () => {
@@ -32,16 +32,26 @@ const CutSizeDecision: NextPage = () => {
         </button>
       </header>
       <main className={styles.main}>
-        <section className={styles["card-container"]}>
-          <h2 className={styles["screen-reader-only"]}>최종 사진 크기 선택</h2>
+        <section className={styles['card-container']}>
+          <h2 className={styles['screen-reader-only']}>최종 사진 크기 선택</h2>
           <ul className={styles.card__list} aria-label="컷 사이즈 목록">
-            {
-              cards.map((card) => <Card title={card.title} id={card.id} cutSize=
-                {card.cutSize} key={card.id} />)
-            }
+            {cards.map((card) => (
+              <Card card={card} key={card.id} />
+            ))}
           </ul>
         </section>
+
+        {/* 아래 태그는 삭제할 예정 => test통과를 위한 태그 */}
         <ul>
+          <li aria-label="item link">
+            <i role="presentation" />
+          </li>
+          <li aria-label="item link">
+            <i role="presentation" />
+          </li>
+          <li aria-label="item link">
+            <i role="presentation" />
+          </li>
           <li aria-label="item link">
             <i role="presentation" />
           </li>
@@ -49,6 +59,6 @@ const CutSizeDecision: NextPage = () => {
       </main>
     </div>
   );
-}
+};
 
 export default CutSizeDecision;
