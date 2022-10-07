@@ -26,6 +26,11 @@
   "settings": {
     "next": {
       "rootDir": "client/"
+    },
+    "import/resolver": {
+      "typescript": {
+        "project": "client/"
+      }
     }
   }
 }
