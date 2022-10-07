@@ -3,6 +3,15 @@ import { render, screen } from '@testing-library/react';
 import HairDecision from '../pages/hair-decision';
 
 describe('Hair Decision Page', () => {
+  beforeEach(() => {
+    URL.createObjectURL = jest.fn();
+    URL.revokeObjectURL = jest.fn();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   it('renders a header', () => {
     render(<HairDecision />);
 

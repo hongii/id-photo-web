@@ -3,6 +3,7 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
+import Crop from '@/components/Crop';
 
 const HairDecision: NextPage = () => (
   <div>
@@ -27,7 +28,7 @@ const HairDecision: NextPage = () => (
     <main>
       <article>
         <h2>사진 조정</h2>
-        <canvas aria-label="얼굴 위치 조정" />
+        <Crop />
       </article>
       <article>
         <section>
