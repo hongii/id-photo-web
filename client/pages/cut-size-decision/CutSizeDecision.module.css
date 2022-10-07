@@ -98,12 +98,13 @@
 	width: 317px;
 	height: 80vh;
 
-	
 	border-radius: 13px;
 	box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
 .card__image{
+	/* max-width: 400px; */
+	/* max-height: 424px; */
 }
 
 .cut-title{
