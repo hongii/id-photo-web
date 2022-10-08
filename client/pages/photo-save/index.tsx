@@ -1,8 +1,8 @@
 import React from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';
-import Link from 'next/link';
 import Image from 'next/image';
+import Header from '@/components/Header';
 
 const PhotoSave: NextPage = () => (
   <div>
@@ -15,19 +15,7 @@ const PhotoSave: NextPage = () => (
       />
       <link rel="icon" href="/favicon.ico" />
     </Head>
-    <header>
-      <h1>사진 저장</h1>
-      <Link href="/photo-retouch" passHref>
-        <a href="replace">
-          <i role="presentation" aria-label="뒤로 가기" />
-        </a>
-      </Link>
-      <Link href="/" passHref>
-        <a href="replace">
-          <i role="presentation" aria-label="메인 화면으로 가기" />
-        </a>
-      </Link>
-    </header>
+    <Header title="사진 저장" href="/photo-retouch" toMain />
     <main>
       <Image src="/vercel.svg" alt="얼굴 사진 결과물" width="43" height="42" />
       <button type="button">저장하기</button>

@@ -1,9 +1,9 @@
 import React from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
-import Link from 'next/link';
 import Image from 'next/image';
 import Crop from '@/components/Crop';
+import Header from '@/components/Header';
 
 const HairDecision: NextPage = () => (
   <div>
@@ -16,15 +16,7 @@ const HairDecision: NextPage = () => (
       />
       <link rel="icon" href="/favicon.ico" />
     </Head>
-    <header>
-      <h1>헤어 결정</h1>
-      <Link href="/" passHref>
-        <a href="replace">
-          <i role="presentation" aria-label="뒤로 가기" />
-        </a>
-      </Link>
-      <button type="button">완료</button>
-    </header>
+    <Header title="헤어 결정" href="/" />
     <main>
       <article>
         <h2>사진 조정</h2>
