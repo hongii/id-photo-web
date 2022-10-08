@@ -1,8 +1,8 @@
 import React from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';
-import Link from 'next/link';
 import Image from 'next/image';
+import Header from '@/components/Header';
 
 const BackgroundDecision: NextPage = () => (
   <div>
@@ -15,15 +15,7 @@ const BackgroundDecision: NextPage = () => (
       />
       <link rel="icon" href="/favicon.ico" />
     </Head>
-    <header>
-      <h1>배경 결정</h1>
-      <Link href="/cut-size-decision" passHref>
-        <a href="replace">
-          <i role="presentation" aria-label="뒤로 가기" />
-        </a>
-      </Link>
-      <button type="button">완료</button>
-    </header>
+    <Header title="배경 결정" href="/cut-size-decision" />
     <main>
       <Image src="/vercel.svg" alt="얼굴 사진 결과물" width="43" height="42" />
       <section>
