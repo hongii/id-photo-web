@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { CardInfo } from '../constants/cutSizeData';
 import styles from '../pages/cut-size-decision/CutSizeDecision.module.css';
 
+// Image src array
 const imgSrc: string[] = [
   '/images/passportImg1.png',
   '/images/studentIdImg2.png',
@@ -22,9 +23,13 @@ const Card = ({ card }: IProps) => (
       width="317"
       height="353"
     />
-
     <p className={styles['cut-title']}>{card.title}</p>
-    <p className={styles['cut-size']}>{card.cutSize}</p>
+    {card.cutSize.map((size) => (
+      <p className={styles['cut-size']} key={size}>
+        {size}
+      </p>
+    ))}
+    {/* <p className={styles['cut-size']}>{card.cutSize}</p> */}
     <button className={styles['select-btn']} type="button">
       선택하기
     </button>
