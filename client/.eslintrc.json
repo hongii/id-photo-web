@@ -10,7 +10,7 @@
   ],
   "rules": {
     // turn on errors for missing imports
-    "import/no-unresolved": "off",
+    "import/no-unresolved": "error",
     "react/function-component-definition": [
       "error",
       {
@@ -27,5 +27,8 @@
     "next": {
       "rootDir": "client/"
     }
+  },
+  "env": {
+    "jest": true
   }
 }

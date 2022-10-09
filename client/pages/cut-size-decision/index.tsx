@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
-import { Navigation, Pagination, Scrollbar } from 'swiper';
+import SwiperCore, { Navigation, Pagination, A11y } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
+import 'swiper/swiper-bundle.min.css';
+import 'swiper/swiper.min.css';
 import styles from './CutSizeDecision.module.css';
 import Card from '../../components/Card';
 import { CardInfo, cutSizeData } from '../../constants/cutSizeData';
 
 const CutSizeDecision: NextPage = () => {
   const [cards] = useState<CardInfo[]>(cutSizeData);
+  SwiperCore.use([Navigation, Pagination, A11y]);
 
   return (
     <div className={styles.container}>
@@ -40,7 +40,6 @@ const CutSizeDecision: NextPage = () => {
         <section className={styles['card-container']}>
           <h2 className={styles['screen-reader-only']}>최종 사진 크기 선택</h2>
           <Swiper
-            modules={[Navigation, Pagination, Scrollbar]}
             spaceBetween={18}
             slidesPerView={1}
             navigation
@@ -56,8 +55,9 @@ const CutSizeDecision: NextPage = () => {
           </Swiper>
           <style global jsx>{`
             /* swiper custom css  */
-            .swiper-pagination-bullets, .swiper-pagination-bullets.swiper-pagination-horizontal{
-              bottom:0;
+            .swiper-pagination-bullets,
+            .swiper-pagination-bullets.swiper-pagination-horizontal {
+              bottom: 0;
             }
 
             .swiper-pagination-bullet {
@@ -76,7 +76,7 @@ const CutSizeDecision: NextPage = () => {
             .swiper-button-next {
               color: #666 !important;
               font-weight: bold !important;
-              background-color: rgba(255,255,255,0.9) !important;
+              background-color: rgba(255, 255, 255, 0.9) !important;
               border-radius: 8px !important;
             }
 
