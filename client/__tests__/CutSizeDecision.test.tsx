@@ -44,15 +44,4 @@ describe('CutSizeDecision Page', () => {
       );
     });
   });
-
-  it('renders item links', () => {
-    render(<CutSizeDecision />);
-
-    const cutSizeList = screen.getAllByRole('listitem', {
-      name: /cut size item/,
-    });
-    const itemLinks = screen.getAllByRole('listitem', { name: /item link/ });
-    expect(itemLinks).not.toHaveLength(0);
-    expect(itemLinks).toHaveLength(cutSizeList.length);
-  });
 });

@@ -87,22 +87,6 @@ const CutSizeDecision: NextPage = () => {
             }
           `}</style>
         </section>
-
-        {/* 아래 태그는 삭제할 예정 => test통과를 위한 태그 */}
-        <ul>
-          <li aria-label="item link">
-            <i role="presentation" />
-          </li>
-          <li aria-label="item link">
-            <i role="presentation" />
-          </li>
-          <li aria-label="item link">
-            <i role="presentation" />
-          </li>
-          <li aria-label="item link">
-            <i role="presentation" />
-          </li>
-        </ul>
       </main>
     </div>
   );
