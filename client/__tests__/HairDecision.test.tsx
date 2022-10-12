@@ -53,12 +53,18 @@ describe('Hair Decision Page', () => {
     expect(heading).toBeInTheDocument();
 
     const list = screen.getByRole('list', { name: /종류 목록/ });
-    const listItem = screen.getByRole('listitem', { name: /type item/ });
-    expect(list).toContainElement(listItem);
-    expect(listItem).toContainElement(
-      screen.getByRole('button', { name: /롱/ })
-    );
-    expect(listItem).toContainElement(screen.getByText(/\|/));
+    const listItems = screen.getAllByRole('listitem', { name: /type item/ });
+    const names = ['롱', '미디움', '단발', '숏컷'];
+    listItems.forEach((listItem, idx) => {
+      expect(list).toContainElement(listItem);
+
+      expect(listItem).toContainElement(
+        screen.getByRole('button', { name: names[idx] })
+      );
+    });
+
+    const bars = screen.getAllByText('|');
+    expect(bars).toHaveLength(listItems.length - 1);
   });
 
   it('renders a hair style list', () => {
@@ -71,10 +77,12 @@ describe('Hair Decision Page', () => {
     expect(heading).toBeInTheDocument();
 
     const list = screen.getByRole('list', { name: /스타일 목록/ });
-    const listItem = screen.getByRole('listitem', { name: /style item/ });
-    expect(list).toContainElement(listItem);
-    expect(listItem).toContainElement(
-      screen.getByAltText(/헤어 스타일 이미지/)
-    );
+    const listItems = screen.getAllByRole('listitem', { name: /style item/ });
+    listItems.forEach((listItem, idx) => {
+      expect(list).toContainElement(listItem);
+      expect(listItem).toContainElement(
+        screen.getAllByAltText(/헤어 스타일 이미지/)[idx]
+      );
+    });
   });
 });

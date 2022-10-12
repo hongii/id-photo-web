@@ -1,5 +1,5 @@
 .container {
-  margin: 0 28px;
+  margin: 0 10%;
   width: auto;
   position: relative;
   aspect-ratio: 3 / 4;
@@ -34,7 +34,7 @@
 }
 
 .transform-container {
-  margin: 0 28px;
+  margin: 0 10%;
   width: auto;
   box-sizing: border-box;
   display: flex;
@@ -55,4 +55,23 @@
 
 .transform-item-input {
   flex: 3;
+}
+
+@media screen and (max-width: 380px) {
+  .container {
+    margin: 0 20%;
+    width: auto;
+    position: relative;
+    aspect-ratio: 3 / 4;
+    box-sizing: border-box;
+  }
+  .transform-container {
+    margin: 0 20%;
+    width: auto;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5%;
+  }
 }
