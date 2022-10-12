@@ -1,6 +1,7 @@
 import React from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
+import Image from 'next/image';
 import styles from '../styles/Home.module.css';
 
 const Home: NextPage = () => (
@@ -23,21 +24,30 @@ const Home: NextPage = () => (
       </p>
 
       <div className={styles['picture-container']}>
-        <img
-          className={styles.picture1}
-          src="/images/picture1.png"
-          alt="picture1"
-        />
-        <img
-          className={styles.picture2}
-          src="/images/picture2.png"
-          alt="picture2"
-        />
-        <img
-          className={styles.picture3}
-          src="/images/picture3.png"
-          alt="picture3"
-        />
+        <div className={styles.picture1}>
+          <Image
+            width={235}
+            height={235}
+            src="/images/picture1.png"
+            alt="picture1"
+          />
+        </div>
+        <div className={styles.picture2}>
+          <Image
+            width={235}
+            height={235}
+            src="/images/picture2.png"
+            alt="picture2"
+          />
+        </div>
+        <div className={styles.picture3}>
+          <Image
+            width={245}
+            height={245}
+            src="/images/picture3.png"
+            alt="picture3"
+          />
+        </div>
       </div>
 
       <div className={styles['start-btn']}>

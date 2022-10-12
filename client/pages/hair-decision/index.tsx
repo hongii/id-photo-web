@@ -1,60 +1,95 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
-import Link from 'next/link';
-import Image from 'next/image';
+import Crop from '@/components/Crop';
+import Header from '@/components/Header';
+import styles from '@/styles/HairDecision.module.css';
+import TypeList from '@/components/TypeList';
+import HairStyleList from '@/components/HairStyleList';
 
-const HairDecision: NextPage = () => (
-  <div>
-    <Head>
-      <title>ID Photo Web</title>
-      <meta name="description" content="id photo generatation service" />
-      <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0"
-      />
-      <link rel="icon" href="/favicon.ico" />
-    </Head>
-    <header>
-      <h1>헤어 결정</h1>
-      <Link href="/" passHref>
-        <a href="replace">
-          <i role="presentation" aria-label="뒤로 가기" />
-        </a>
-      </Link>
-      <button type="button">완료</button>
-    </header>
-    <main>
-      <article>
-        <h2>사진 조정</h2>
-        <canvas aria-label="얼굴 위치 조정" />
-      </article>
-      <article>
-        <section>
-          <h2>헤어 스타일 종류 선택</h2>
-          <ul aria-label="종류 목록">
-            <li aria-label="type item">
-              <button type="button">롱</button>
-              <i>|</i>
-            </li>
-          </ul>
-        </section>
-        <section>
-          <h2>헤어 스타일 선택</h2>
-          <ul aria-label="스타일 목록">
-            <li aria-label="style item">
-              <Image
-                src="/vercel.svg"
-                alt="헤어 스타일 이미지"
-                width="43"
-                height="42"
-              />
-            </li>
-          </ul>
-        </section>
-      </article>
-    </main>
-  </div>
-);
+const typeNames = ['롱', '미디움', '단발', '숏컷'];
+const hairStyleImages: { [key: string]: string[] } = {
+  롱: [
+    '/images/hairImg1.png',
+    '/images/hairImg2.png',
+    '/images/hairImg3.png',
+    '/images/hairImg4.png',
+  ],
+  미디움: [
+    '/images/hairImg2.png',
+    '/images/hairImg3.png',
+    '/images/hairImg4.png',
+    '/images/hairImg1.png',
+  ],
+  단발: [
+    '/images/hairImg3.png',
+    '/images/hairImg4.png',
+    '/images/hairImg1.png',
+    '/images/hairImg2.png',
+  ],
+  숏컷: [
+    '/images/hairImg4.png',
+    '/images/hairImg1.png',
+    '/images/hairImg2.png',
+    '/images/hairImg3.png',
+  ],
+};
 
+const HairDecision: NextPage = () => {
+  const [activeType, setActiveType] = useState(0);
+  const [selectedHair, setSelectedHair] = useState(-1);
+
+  const handleSelectHair = (idx: number) => {
+    if (idx === selectedHair) {
+      setSelectedHair(-1);
+      return;
+    }
+    setSelectedHair(idx);
+  };
+
+  useEffect(() => {
+    setSelectedHair(-1);
+  }, [activeType]);
+
+  return (
+    <div className={styles.page}>
+      <Head>
+        <title>ID Photo Web</title>
+        <meta name="description" content="id photo generatation service" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0"
+        />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <Header title="헤어 결정" href="/" />
+      <main className={styles.main}>
+        <article>
+          <h2 className={styles['screen-reader-only']}>사진 조정</h2>
+          <Crop />
+        </article>
+        <article className={styles['select-container']}>
+          <section>
+            <h2 className={styles['screen-reader-only']}>
+              헤어 스타일 종류 선택
+            </h2>
+            <TypeList
+              typeNames={typeNames}
+              activeTarget={activeType}
+              onClick={setActiveType}
+            />
+          </section>
+          <section className={styles['hair-style-container']}>
+            <h2 className={styles['screen-reader-only']}>헤어 스타일 선택</h2>
+            <HairStyleList
+              images={hairStyleImages[typeNames[activeType]]}
+              checkTarget={selectedHair}
+              onClick={handleSelectHair}
+            />
+          </section>
+        </article>
+      </main>
+    </div>
+  );
+};
 export default HairDecision;
