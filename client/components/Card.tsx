@@ -13,9 +13,10 @@ const imgSrc: string[] = [
 
 interface IProps {
   card: CardInfo;
+  onClick: () => void;
 }
 
-const Card = ({ card }: IProps) => (
+const Card = ({ card, onClick }: IProps) => (
   <li className={styles.card__item} aria-label="cut size item">
     <Image
       src={imgSrc[card.id]}
@@ -30,7 +31,7 @@ const Card = ({ card }: IProps) => (
       </p>
     ))}
     {/* <p className={styles['cut-size']}>{card.cutSize}</p> */}
-    <button className={styles['select-btn']} type="button">
+    <button className={styles['select-btn']} type="button" onClick={onClick}>
       선택하기
     </button>
   </li>

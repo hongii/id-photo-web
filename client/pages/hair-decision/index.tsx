@@ -6,6 +6,9 @@ import Header from '@/components/Header';
 import styles from '@/styles/HairDecision.module.css';
 import TypeList from '@/components/TypeList';
 import HairStyleList from '@/components/HairStyleList';
+import { useRecoilValue } from 'recoil';
+import { withSrc } from 'recoil/faceImage';
+import { useRouter } from 'next/router';
 
 const typeNames = ['롱', '미디움', '단발', '숏컷'];
 const hairStyleImages: { [key: string]: string[] } = {
@@ -38,6 +41,8 @@ const hairStyleImages: { [key: string]: string[] } = {
 const HairDecision: NextPage = () => {
   const [activeType, setActiveType] = useState(0);
   const [selectedHair, setSelectedHair] = useState(-1);
+  const faceSrc = useRecoilValue(withSrc);
+  const router = useRouter();
 
   const handleSelectHair = (idx: number) => {
     if (idx === selectedHair) {
@@ -46,6 +51,12 @@ const HairDecision: NextPage = () => {
     }
     setSelectedHair(idx);
   };
+
+  useEffect(() => {
+    if (faceSrc === '/') {
+      router.push('/');
+    }
+  }, [faceSrc, router]);
 
   useEffect(() => {
     setSelectedHair(-1);
@@ -62,11 +73,15 @@ const HairDecision: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Header title="헤어 결정" href="/" />
+      <Header
+        title="헤어 결정"
+        href="/"
+        onClickButton={() => router.push('/cut-size-decision')}
+      />
       <main className={styles.main}>
         <article>
           <h2 className={styles['screen-reader-only']}>사진 조정</h2>
-          <Crop />
+          <Crop faceSrc={faceSrc} />
         </article>
         <article className={styles['select-container']}>
           <section>
