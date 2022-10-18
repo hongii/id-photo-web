@@ -1,10 +1,29 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { RecoilRoot } from 'recoil';
+import { useRouter } from 'next/router';
 import CutSizeDecision from '../pages/cut-size-decision';
 
+jest.mock('next/router', () => ({
+  useRouter: jest.fn(),
+}));
+
 describe('CutSizeDecision Page', () => {
+  beforeEach(() => {
+    URL.createObjectURL = jest.fn();
+    URL.revokeObjectURL = jest.fn();
+    const push = jest.fn();
+    (useRouter as jest.Mock).mockImplementation(() => ({
+      push,
+    }));
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   it('renders a header', () => {
-    render(<CutSizeDecision />);
+    render(<CutSizeDecision />, { wrapper: RecoilRoot });
 
     const heading = screen.getByRole('heading', {
       name: /컷 사이즈/,
@@ -19,7 +38,7 @@ describe('CutSizeDecision Page', () => {
   });
 
   it('renders a cut size list', () => {
-    render(<CutSizeDecision />);
+    render(<CutSizeDecision />, { wrapper: RecoilRoot });
 
     const heading = screen.getByRole('heading', {
       name: /최종 사진 크기 선택/,

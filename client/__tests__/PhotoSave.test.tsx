@@ -1,10 +1,29 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { RecoilRoot } from 'recoil';
+import { useRouter } from 'next/router';
 import PhotoSave from '../pages/photo-save';
 
+jest.mock('next/router', () => ({
+  useRouter: jest.fn(),
+}));
+
 describe('Photo Save Page', () => {
+  beforeEach(() => {
+    URL.createObjectURL = jest.fn();
+    URL.revokeObjectURL = jest.fn();
+    const push = jest.fn();
+    (useRouter as jest.Mock).mockImplementation(() => ({
+      push,
+    }));
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   it('renders a header', () => {
-    render(<PhotoSave />);
+    render(<PhotoSave />, { wrapper: RecoilRoot });
 
     const heading = screen.getByRole('heading', {
       name: /사진 저장/,
@@ -24,14 +43,14 @@ describe('Photo Save Page', () => {
   });
 
   it('renders a result image', () => {
-    render(<PhotoSave />);
+    render(<PhotoSave />, { wrapper: RecoilRoot });
 
     const result = screen.getByAltText(/얼굴 사진 결과물/);
     expect(result).toBeInTheDocument();
   });
 
   it('renders a save button', () => {
-    render(<PhotoSave />);
+    render(<PhotoSave />, { wrapper: RecoilRoot });
 
     const save = screen.getByRole('button', { name: /저장하기/ });
     expect(save).toBeInTheDocument();

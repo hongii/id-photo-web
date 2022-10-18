@@ -10,21 +10,6 @@ import debounce from 'utils/debounce';
 import guideLineImage from '../../public/images/guide-line.png';
 import styles from './Crop.module.css';
 
-const FileInput = ({
-  setFile,
-}: {
-  setFile: React.Dispatch<React.SetStateAction<File | undefined>>;
-}): JSX.Element => {
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { files } = e.target;
-    if (files && files.length !== 0) {
-      setFile(files[0]);
-    }
-  };
-
-  return <input type="file" name="face" id="test" onChange={handleChange} />;
-};
-
 const TransformInputs = ({
   scale,
   rotate,
@@ -102,11 +87,14 @@ const TransformInputs = ({
   );
 };
 
-const Crop = (): JSX.Element => {
+interface IProps {
+  faceSrc: string;
+}
+
+const Crop = ({ faceSrc }: IProps): JSX.Element => {
   const canvas = useRef<HTMLCanvasElement>(null);
   const canvasSize = useRef({ width: 300, height: 426 });
 
-  const [faceFile, setFaceFile] = useState<File>();
   const faceImage = useRef<HTMLImageElement>(null);
 
   const [origin, setOrigin] = useState({ x: 0, y: 0, dx: 0, dy: 0 });
@@ -226,8 +214,8 @@ const Crop = (): JSX.Element => {
   };
 
   useEffect(() => {
-    draw();
-  }, [origin.x, origin.y, scale, rotate, draw]);
+    if (faceSrc !== '/') draw();
+  }, [origin.x, origin.y, scale, rotate, draw, faceSrc]);
 
   useEffect(() => {
     handleResize();
@@ -237,24 +225,18 @@ const Crop = (): JSX.Element => {
     };
   }, []);
 
-  useEffect(() => {
-    let src = '';
-    if (faceFile && faceImage.current) {
-      src = URL.createObjectURL(faceFile);
-      faceImage.current.src = src;
-    }
-    return () => {
-      URL.revokeObjectURL(src);
-    };
-  }, [faceFile]);
-
   return (
     <>
-      <FileInput setFile={setFaceFile} />
       <div className={styles.container}>
         {
           // eslint-disable-next-line @next/next/no-img-element
-          <img alt="face" ref={faceImage} hidden onLoad={handleLoad} />
+          <img
+            alt="face"
+            ref={faceImage}
+            hidden
+            onLoad={handleLoad}
+            src={faceSrc}
+          />
         }
         <canvas
           className={styles.crop}

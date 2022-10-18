@@ -1,10 +1,29 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { RecoilRoot } from 'recoil';
+import { useRouter } from 'next/router';
 import BackgroundDecision from '../pages/background-decision';
 
+jest.mock('next/router', () => ({
+  useRouter: jest.fn(),
+}));
+
 describe('Background Decision Page', () => {
+  beforeEach(() => {
+    URL.createObjectURL = jest.fn();
+    URL.revokeObjectURL = jest.fn();
+    const push = jest.fn();
+    (useRouter as jest.Mock).mockImplementation(() => ({
+      push,
+    }));
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   it('renders a header', () => {
-    render(<BackgroundDecision />);
+    render(<BackgroundDecision />, { wrapper: RecoilRoot });
 
     const heading = screen.getByRole('heading', {
       name: /배경 결정/,
@@ -22,14 +41,14 @@ describe('Background Decision Page', () => {
   });
 
   it('renders a result image', () => {
-    render(<BackgroundDecision />);
+    render(<BackgroundDecision />, { wrapper: RecoilRoot });
 
     const result = screen.getByAltText(/얼굴 사진 결과물/);
     expect(result).toBeInTheDocument();
   });
 
   it('renders a type list', () => {
-    render(<BackgroundDecision />);
+    render(<BackgroundDecision />, { wrapper: RecoilRoot });
 
     const heading = screen.getByRole('heading', {
       name: /배경 종류 선택/,
@@ -38,16 +57,16 @@ describe('Background Decision Page', () => {
     expect(heading).toBeInTheDocument();
 
     const list = screen.getByRole('list', { name: /종류 목록/ });
-    const listItem = screen.getByRole('listitem', { name: /type item/ });
-    expect(list).toContainElement(listItem);
-    expect(listItem).toContainElement(
+    const listItems = screen.getAllByRole('listitem', { name: /type item/ });
+    expect(list).toContainElement(listItems[0]);
+    expect(listItems[0]).toContainElement(
       screen.getByRole('button', { name: /단색/ })
     );
-    expect(listItem).toContainElement(screen.getByText(/\|/));
+    expect(listItems[0]).toContainElement(screen.getByText(/\|/));
   });
 
   it('renders a background color list', () => {
-    render(<BackgroundDecision />);
+    render(<BackgroundDecision />, { wrapper: RecoilRoot });
 
     const heading = screen.getByRole('heading', {
       name: /배경 색상 선택/,
@@ -56,10 +75,10 @@ describe('Background Decision Page', () => {
     expect(heading).toBeInTheDocument();
 
     const list = screen.getByRole('list', { name: /색상 목록/ });
-    const listItem = screen.getByRole('listitem', { name: /color item/ });
-    expect(list).toContainElement(listItem);
-    expect(listItem).toContainElement(
-      screen.getByRole('button', { name: /#ffffff/ })
+    const listItems = screen.getAllByRole('listitem', { name: /color item/ });
+    expect(list).toContainElement(listItems[0]);
+    expect(listItems[0]).toContainElement(
+      screen.getByRole('button', { name: /transparent/ })
     );
   });
 });

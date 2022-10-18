@@ -1,11 +1,21 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { RecoilRoot } from 'recoil';
+import { useRouter } from 'next/router';
 import HairDecision from '../pages/hair-decision';
+
+jest.mock('next/router', () => ({
+  useRouter: jest.fn(),
+}));
 
 describe('Hair Decision Page', () => {
   beforeEach(() => {
     URL.createObjectURL = jest.fn();
     URL.revokeObjectURL = jest.fn();
+    const push = jest.fn();
+    (useRouter as jest.Mock).mockImplementation(() => ({
+      push,
+    }));
   });
 
   afterEach(() => {
@@ -13,7 +23,7 @@ describe('Hair Decision Page', () => {
   });
 
   it('renders a header', () => {
-    render(<HairDecision />);
+    render(<HairDecision />, { wrapper: RecoilRoot });
 
     const heading = screen.getByRole('heading', {
       name: /헤어 결정/,
@@ -31,7 +41,7 @@ describe('Hair Decision Page', () => {
   });
 
   it('renders a photo alignment', () => {
-    render(<HairDecision />);
+    render(<HairDecision />, { wrapper: RecoilRoot });
 
     const heading = screen.getByRole('heading', {
       name: /사진 조정/,
@@ -44,7 +54,7 @@ describe('Hair Decision Page', () => {
   });
 
   it('renders a type list', () => {
-    render(<HairDecision />);
+    render(<HairDecision />, { wrapper: RecoilRoot });
 
     const heading = screen.getByRole('heading', {
       name: /헤어 스타일 종류 선택/,
@@ -68,7 +78,7 @@ describe('Hair Decision Page', () => {
   });
 
   it('renders a hair style list', () => {
-    render(<HairDecision />);
+    render(<HairDecision />, { wrapper: RecoilRoot });
 
     const heading = screen.getByRole('heading', {
       name: /헤어 스타일 선택/,
