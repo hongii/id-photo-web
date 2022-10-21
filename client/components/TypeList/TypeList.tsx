@@ -1,5 +1,5 @@
+import classnames from 'classnames';
 import React from 'react';
-import classListCreator from 'utils/classList';
 import styles from './TypeList.module.css';
 
 type Props = {
@@ -18,23 +18,21 @@ const TypeListItem = ({
   active: boolean;
   onClick: () => void;
   isLast: boolean;
-}) => {
-  const classList = classListCreator(styles);
-  return (
-    <li aria-label="type item" className={styles['type-select__item']}>
-      <button
-        type="button"
-        className={classList(['type-select__btn', 'type-select__btn--active'], {
-          'type-select__btn--active': active,
-        })}
-        onClick={onClick}
-      >
-        {typeName}
-      </button>
-      {!isLast && <i className={styles['type-select__bar']}>|</i>}
-    </li>
-  );
-};
+}) => (
+  <li aria-label="type item" className={styles['type-select__item']}>
+    <button
+      type="button"
+      className={classnames(styles['type-select__btn'],{
+        [styles['type-select__btn--active']]: active,
+      })}
+      onClick={onClick}
+    >
+      {typeName}
+    </button>
+    {!isLast && <i className={styles['type-select__bar']}>|</i>}
+  </li>
+);
+
 
 const TypeList = ({ typeNames, onClick, activeTarget }: Props) => (
   <ul aria-label="종류 목록" className={styles['type-select']}>
