@@ -22,7 +22,7 @@ const TypeListItem = ({
   <li aria-label="type item" className={styles['type-select__item']}>
     <button
       type="button"
-      className={classnames(styles['type-select__btn'],{
+      className={classnames(styles['type-select__btn'], {
         [styles['type-select__btn--active']]: active,
       })}
       onClick={onClick}
@@ -32,7 +32,6 @@ const TypeListItem = ({
     {!isLast && <i className={styles['type-select__bar']}>|</i>}
   </li>
 );
-
 
 const TypeList = ({ typeNames, onClick, activeTarget }: Props) => (
   <ul aria-label="종류 목록" className={styles['type-select']}>
