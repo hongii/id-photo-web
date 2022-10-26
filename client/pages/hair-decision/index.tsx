@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import Crop from '@/components/Crop';
@@ -6,8 +6,8 @@ import Header from '@/components/Header';
 import styles from '@/styles/HairDecision.module.css';
 import TypeList from '@/components/TypeList';
 import HairStyleList from '@/components/HairStyleList';
-import { useRecoilValue } from 'recoil';
-import { withSrc } from 'recoil/faceImage';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import faceImageState, { withSrc } from 'recoil/faceImage';
 import { useRouter } from 'next/router';
 
 const typeNames = ['롱', '미디움', '단발', '숏컷'];
@@ -41,8 +41,28 @@ const hairStyleImages: { [key: string]: string[] } = {
 const HairDecision: NextPage = () => {
   const [activeType, setActiveType] = useState(0);
   const [selectedHair, setSelectedHair] = useState(-1);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [, setFaceImage] = useRecoilState(faceImageState);
   const faceSrc = useRecoilValue(withSrc);
   const router = useRouter();
+
+  const toBlob = async (canvas: HTMLCanvasElement) =>
+    new Promise<Blob>((resolve) => {
+      canvas.toBlob((blob) => {
+        resolve(blob as Blob);
+      });
+    });
+
+  const handleComplete = async () => {
+    if (!canvasRef.current) return;
+
+    const croppedFace = await toBlob(canvasRef.current);
+    if (faceSrc) {
+      URL.revokeObjectURL(faceSrc);
+    }
+    setFaceImage(croppedFace);
+    router.push('/cut-size-decision');
+  };
 
   const handleSelectHair = (idx: number) => {
     if (idx === selectedHair) {
@@ -73,15 +93,11 @@ const HairDecision: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Header
-        title="헤어 결정"
-        href="/"
-        onClickButton={() => router.push('/cut-size-decision')}
-      />
+      <Header title="헤어 결정" href="/" onClickButton={handleComplete} />
       <main className={styles.main}>
         <article>
           <h2 className={styles['screen-reader-only']}>사진 조정</h2>
-          <Crop faceSrc={faceSrc} />
+          <Crop faceSrc={faceSrc} ref={canvasRef} />
         </article>
         <article className={styles['select-container']}>
           <section>

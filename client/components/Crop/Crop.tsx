@@ -1,5 +1,8 @@
 import React, {
   ChangeEvent,
+  forwardRef,
+  Ref,
+  RefObject,
   useCallback,
   useEffect,
   useRef,
@@ -91,8 +94,11 @@ interface IProps {
   faceSrc: string;
 }
 
-const Crop = ({ faceSrc }: IProps): JSX.Element => {
-  const canvas = useRef<HTMLCanvasElement>(null);
+const Crop = (
+  { faceSrc }: IProps,
+  ref: Ref<HTMLCanvasElement>
+): JSX.Element => {
+  const canvas = ref as RefObject<HTMLCanvasElement>;
   const canvasSize = useRef({ width: 300, height: 426 });
 
   const faceImage = useRef<HTMLImageElement>(null);
@@ -139,7 +145,7 @@ const Crop = ({ faceSrc }: IProps): JSX.Element => {
       );
       ctx.restore();
     }
-  }, [origin.x, origin.y, scale, rotate]);
+  }, [origin.x, origin.y, scale, rotate, canvas]);
 
   const translateImage = (clientX: number, clientY: number) => {
     const { x, y, dx, dy } = origin;
@@ -192,7 +198,7 @@ const Crop = ({ faceSrc }: IProps): JSX.Element => {
     draw();
   };
 
-  const handleResize = () => {
+  const handleResize = useCallback(() => {
     if (canvas.current) {
       const { width, height } = canvasSize.current;
       const { offsetWidth = width, offsetHeight = height } =
@@ -201,7 +207,7 @@ const Crop = ({ faceSrc }: IProps): JSX.Element => {
       canvas.current.height = offsetHeight;
       canvasSize.current = { width: offsetWidth, height: offsetHeight };
     }
-  };
+  }, [canvas]);
 
   const handleLoad = () => {
     setRotate(0);
@@ -223,7 +229,7 @@ const Crop = ({ faceSrc }: IProps): JSX.Element => {
     return () => {
       window.removeEventListener('resize', debounce(handleResize, 500));
     };
-  }, []);
+  }, [handleResize]);
 
   return (
     <>
@@ -268,4 +274,5 @@ const Crop = ({ faceSrc }: IProps): JSX.Element => {
   );
 };
 
-export default Crop;
+const forwardedCrop = forwardRef(Crop);
+export default forwardedCrop;

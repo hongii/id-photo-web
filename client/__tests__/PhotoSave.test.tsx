@@ -52,7 +52,7 @@ describe('Photo Save Page', () => {
   it('renders a save button', () => {
     render(<PhotoSave />, { wrapper: RecoilRoot });
 
-    const save = screen.getByRole('button', { name: /저장하기/ });
+    const save = screen.getByRole('link', { name: /저장하기/ });
     expect(save).toBeInTheDocument();
   });
 });
