@@ -89,3 +89,9 @@
   font-size: 20px;
   line-height: 20px;
 }
+
+.ratio {
+  width: 55vw;
+  margin-left: 20px;
+  margin-right: 20px;
+}
