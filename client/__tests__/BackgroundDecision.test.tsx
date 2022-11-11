@@ -43,7 +43,7 @@ describe('Background Decision Page', () => {
   it('renders a result image', () => {
     render(<BackgroundDecision />, { wrapper: RecoilRoot });
 
-    const result = screen.getByAltText(/얼굴 사진 결과물/);
+    const result = screen.getByLabelText(/얼굴 사진 결과물/);
     expect(result).toBeInTheDocument();
   });
 

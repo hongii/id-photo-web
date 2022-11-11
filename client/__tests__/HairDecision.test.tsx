@@ -35,9 +35,6 @@ describe('Hair Decision Page', () => {
     expect(backIcon).toBeInTheDocument();
     const link = screen.getByRole('link');
     expect(link).toContainElement(backIcon);
-
-    const completeBtn = screen.getByRole('button', { name: /완료/ });
-    expect(completeBtn).toBeInTheDocument();
   });
 
   it('renders a photo alignment', () => {

@@ -8,41 +8,16 @@ import TypeList from '@/components/TypeList';
 import HairStyleList from '@/components/HairStyleList';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import faceImageState, { withSrc } from 'recoil/faceImage';
+import noBgPhotoAtom from 'recoil/noBgPhotoAtom';
 import { useRouter } from 'next/router';
-
-const typeNames = ['롱', '미디움', '단발', '숏컷'];
-const hairStyleImages: { [key: string]: string[] } = {
-  롱: [
-    '/images/hairImg1.png',
-    '/images/hairImg2.png',
-    '/images/hairImg3.png',
-    '/images/hairImg4.png',
-  ],
-  미디움: [
-    '/images/hairImg2.png',
-    '/images/hairImg3.png',
-    '/images/hairImg4.png',
-    '/images/hairImg1.png',
-  ],
-  단발: [
-    '/images/hairImg3.png',
-    '/images/hairImg4.png',
-    '/images/hairImg1.png',
-    '/images/hairImg2.png',
-  ],
-  숏컷: [
-    '/images/hairImg4.png',
-    '/images/hairImg1.png',
-    '/images/hairImg2.png',
-    '/images/hairImg3.png',
-  ],
-};
+import { hairStyleImages, typeNames } from '../../constants/hairStyleData';
 
 const HairDecision: NextPage = () => {
   const [activeType, setActiveType] = useState(0);
   const [selectedHair, setSelectedHair] = useState(-1);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [, setFaceImage] = useRecoilState(faceImageState);
+  const [faceImage, setFaceImage] = useRecoilState(faceImageState);
+  const [, setNoBgPhoto] = useRecoilState(noBgPhotoAtom);
   const faceSrc = useRecoilValue(withSrc);
   const router = useRouter();
 
@@ -61,6 +36,7 @@ const HairDecision: NextPage = () => {
       URL.revokeObjectURL(faceSrc);
     }
     setFaceImage(croppedFace);
+    setNoBgPhoto('');
     router.push('/cut-size-decision');
   };
 
@@ -70,6 +46,64 @@ const HairDecision: NextPage = () => {
       return;
     }
     setSelectedHair(idx);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleUploadImage = async () => {
+    const responseOfPresignedURL = await fetch(
+      `/aws/prod/sr/presignedurlforupload`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          method: 'PUT',
+          fileName: `user_image`,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    const presignedURL = await responseOfPresignedURL.text();
+
+    const newNameImg = new File([faceImage as Blob], 'user_image', {
+      type: (faceImage as Blob).type,
+    });
+
+    const uri = presignedURL.replace(
+      'https://sweetndata-barbershop.s3.amazonaws.com/',
+      ''
+    );
+    const result = await fetch(`/s3/${uri}`.replaceAll(/"|(%22)/gi, ''), {
+      method: 'PUT',
+      body: newNameImg,
+      headers: {
+        'Content-Type': newNameImg.type,
+      },
+    });
+
+    if (!result.ok) {
+      // eslint-disable-next-line no-alert
+      alert('s3 upload fail');
+      router.push('/');
+    }
+
+    const responseOfGetImage = await fetch(
+      `/aws/prod/sr/presignedurlforupload`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          method: 'GET',
+          fileName: `user_image`,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    const resultImageURL = await responseOfGetImage.text();
+
+    // eslint-disable-next-line no-console
+    console.log(resultImageURL);
   };
 
   useEffect(() => {
@@ -93,7 +127,12 @@ const HairDecision: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Header title="헤어 결정" href="/" onClickButton={handleComplete} />
+      <Header
+        title="헤어 결정"
+        href="/"
+        onClickButton={handleComplete}
+        hideButton={selectedHair === -1}
+      />
       <main className={styles.main}>
         <article>
           <h2 className={styles['screen-reader-only']}>사진 조정</h2>

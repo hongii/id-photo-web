@@ -6,6 +6,18 @@ const nextConfig = {
   eslint: {
     dirs: ['.'],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/aws/:path*',
+        destination: `https://dpus62qeqc.execute-api.ap-northeast-2.amazonaws.com/:path*`,
+      },
+      {
+        source: '/s3/:path*',
+        destination: `https://sweetndata-barbershop.s3.amazonaws.com/:path*`,
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;
