@@ -57,12 +57,17 @@ describe('Photo Retouch Page', () => {
     expect(heading).toBeInTheDocument();
 
     const list = screen.getByRole('list', { name: /종류 목록/ });
-    const listItem = screen.getByRole('listitem', { name: /type item/ });
-    expect(list).toContainElement(listItem);
-    expect(listItem).toContainElement(
-      screen.getByRole('button', { name: /미백/ })
-    );
-    expect(listItem).toContainElement(screen.getByText(/\|/));
+    const listItems = screen.getAllByRole('listitem', { name: /type item/ });
+    const names = ['미백', '갸름하게'];
+    listItems.forEach((listItem, idx) => {
+      expect(list).toContainElement(listItem);
+      expect(listItem).toContainElement(
+        screen.getByRole('button', { name: names[idx] })
+      );
+    });
+
+    const bars = screen.getAllByText('|');
+    expect(bars).toHaveLength(listItems.length - 1);
   });
 
   it('renders a range input', () => {
