@@ -7,11 +7,13 @@ import { useRouter } from 'next/router';
 import { useRecoilValue } from 'recoil';
 import { withSrc } from 'recoil/faceImage';
 import styles from '@/styles/PhotoSave.module.css';
+import imgRatioState from 'recoil/imgRatio';
 
 const PhotoSave: NextPage = () => {
   const faceSrc = useRecoilValue(withSrc);
   const router = useRouter();
   const [downloadURL, setDownloadURL] = useState(faceSrc);
+  const { width, height } = useRecoilValue(imgRatioState);
 
   useEffect(() => {
     if (faceSrc === '/') {
@@ -21,18 +23,17 @@ const PhotoSave: NextPage = () => {
 
   useEffect(() => {
     const img = document.createElement('img');
-    const [w, h] = [3.5, 4.5];
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalWidth * (h / w);
+      canvas.width = width;
+      canvas.height = height;
       const ctx = canvas.getContext('2d');
-      ctx?.drawImage(img, 0, 0, img.naturalWidth, img.naturalWidth * (h / w));
+      ctx?.drawImage(img, 0, 0, width, height);
       const url = canvas.toDataURL();
       setDownloadURL(url);
     };
     img.src = faceSrc;
-  }, [faceSrc]);
+  }, [faceSrc, width, height]);
 
   return (
     <div className={styles['page-layout']}>
@@ -55,7 +56,7 @@ const PhotoSave: NextPage = () => {
         <div className={styles['download-container']}>
           <a
             href={downloadURL}
-            download={`id-photo-result-${Date.now()}`}
+            download="id-photo-result"
             className={styles.download}
           >
             저장하기

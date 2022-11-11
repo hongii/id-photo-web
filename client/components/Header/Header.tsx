@@ -26,7 +26,13 @@ const Header = ({
   ) : null;
   return (
     <header className={styles.header}>
-      <h1 className={styles.title}>{title}</h1>
+      <h1
+        className={`${styles.title} ${
+          !hideButton ? styles.pdl38 : styles.pdr20
+        }`}
+      >
+        {title}
+      </h1>
       <Link href={href} passHref>
         <a href="replace">
           <i

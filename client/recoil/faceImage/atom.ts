@@ -1,7 +1,7 @@
 import { atom } from 'recoil';
 
 const faceImageState = atom<File | Blob | null>({
-  key: 'faceImageState',
+  key: `faceImageState_${Date.now()}`,
   default: null,
 });
 

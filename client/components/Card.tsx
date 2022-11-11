@@ -9,6 +9,8 @@ const imgSrc: string[] = [
   '/images/studentIdImg2.png',
   '/images/employeeIDImg3.png',
   '/images/visaImg4.png',
+  '/images/visaImg4.png',
+  '/images/visaImg4.png',
 ];
 
 interface IProps {
@@ -30,7 +32,6 @@ const Card = ({ card, onClick }: IProps) => (
         {size}
       </p>
     ))}
-    {/* <p className={styles['cut-size']}>{card.cutSize}</p> */}
     <button className={styles['select-btn']} type="button" onClick={onClick}>
       선택하기
     </button>

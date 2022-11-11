@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import SwiperCore, { Navigation, Pagination, A11y } from 'swiper';
@@ -6,7 +6,10 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/swiper-bundle.min.css';
 import 'swiper/swiper.min.css';
 import Header from '@/components/Header';
-import router from 'next/router';
+import { useRouter } from 'next/router';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import imgRatioState from 'recoil/imgRatio';
+import { withSrc } from 'recoil/faceImage';
 import styles from './CutSizeDecision.module.css';
 import Card from '../../components/Card';
 import { CardInfo, cutSizeData } from '../../constants/cutSizeData';
@@ -14,6 +17,20 @@ import { CardInfo, cutSizeData } from '../../constants/cutSizeData';
 const CutSizeDecision: NextPage = () => {
   const [cards] = useState<CardInfo[]>(cutSizeData);
   SwiperCore.use([Navigation, Pagination, A11y]);
+  const [, setImgRatioState] = useRecoilState(imgRatioState);
+  const faceSrc = useRecoilValue(withSrc);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (faceSrc === '/') {
+      router.push('/');
+    }
+  }, [faceSrc, router]);
+
+  const handleClick = (ratio: { width: number; height: number }) => () => {
+    setImgRatioState(ratio);
+    router.push('/background-decision');
+  };
 
   return (
     <div className={styles.container}>
@@ -39,10 +56,7 @@ const CutSizeDecision: NextPage = () => {
             <ul className={styles.card__list} aria-label="컷 사이즈 목록">
               {cards.map((card) => (
                 <SwiperSlide key={card.id}>
-                  <Card
-                    card={card}
-                    onClick={() => router.push('/background-decision')}
-                  />
+                  <Card card={card} onClick={handleClick(card.ratio)} />
                 </SwiperSlide>
               ))}
             </ul>
