@@ -1,80 +1,149 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, ChangeEvent } from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
 import Header from '@/components/Header';
 import RetouchTypes from '@/components/RetouchTypes';
 import { useRouter } from 'next/router';
-import { useRecoilValue } from 'recoil';
-import { withSrc } from 'recoil/faceImage';
-// import axios from 'axios';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import faceImageState, { withSrc } from 'recoil/faceImage';
+import axios from 'axios';
+import SkinBeautyRange from '@/components/SkinBeautyRange';
+import SlimmingRange from '@/components/SlimmingRange';
 import styles from './PhotoRetouch.module.css';
-
 
 const PhotoRetouch: NextPage = () => {
   const faceSrc = useRecoilValue(withSrc);
   const router = useRouter();
   const [activeType, setActiveType] = useState(0);
-  const types: string[] = ['미백', '갸름하게'];
-  
-  // const BEAUTY_API_KEY = process.env.BEAUTY_API_KEY;
+  const types: string[] = ['깨끗하게', '슬림하게'];
+  const [faceImage, setFaceImage] = useRecoilState(faceImageState);
+  const [retouchImageTmp, setRetouchImageTmp] = useState(faceImage);
+  const [retouchImageUrlTmp, setRetouchImageUrlTmp] = useState(faceSrc);
+  const [selectType, setSelectType] = useState(0);
+  const [skinValue, setSkinValue] = useState('0');
+  const [slimValue, setSlimValue] = useState('0');
+  const [isCheckBtn, setIsCheckBtn] = useState(false);
+  const BEAUTY_API_KEY = process.env.NEXT_PUBLIC_BEAUTY_API_KEY;
 
-  // const handleOnChange = () => {
-  // let fileInput = document.getElementById("fileInput");
-  // 값이 변경될때 호출 되는 이벤트 리스너
-  // console.log(fileInput.files)
+  const fetchImage = async (imageURL: string) => {
+    const blob = await fetch(imageURL).then((res) => res.blob());
 
-  /* 스킨 뷰티 기능 */
-  //   const data = new FormData();
-  //   data.append("image_target", fileInput.files[0], "sample.png");
+    setRetouchImageTmp(blob);
+    setRetouchImageUrlTmp(URL.createObjectURL(blob));
+    // console.log(blob);
+  };
 
-  //   const options = {
-  //     method: 'POST',
-  //     url: 'https://photo-retouching.p.rapidapi.com/huoshan/facebody/facepretty',
-  //     headers: {
-  //       'X-RapidAPI-Key': BEAUTY_API_KEY,
-  //       'X-RapidAPI-Host': 'photo-retouching.p.rapidapi.com'
-  //     },
-  //     data: data
-  //   };
+  const handleOnChangeBySkin = async (event: ChangeEvent<HTMLInputElement>) => {
+    // console.log(faceImage)
+    // console.log(faceSrc)
 
-  //   axios.request(options).then(function (response) {
-  //     console.log(response.data);
-  //   }).catch(function (error) {
-  //     console.error(error);
-  //   });
-  //   // }
+    const rangeValue: string = event.target.value;
+    if (+rangeValue > 0) {
+      setIsCheckBtn(true);
+      setSkinValue(rangeValue);
+    }
+    // console.log(rangeValue);
 
-  /* 슬리밍 기능 */
-  // const data = new FormData();
-  // data.append("image", fileInput.files[0], "sample.png");
-  // data.append("slim_degree", "2.0");
+    const degree: string = (+rangeValue / 100).toString();
+    // console.log(degree);
+    // console.log(typeof degree);
+    
+    /* 스킨 뷰티 기능 */
+    const data = new FormData();
+    data.append('image', faceImage as Blob, 'photo.png');
+    data.append('retouch_degree', degree);
+    data.append('whitening_degree', degree);
 
-  // const options = {
-  //   method: 'POST',
-  //   url: 'https://ai-face-slimming.p.rapidapi.com/face/editing/liquify-face',
-  //   headers: {
-  //     'X-RapidAPI-Key': 'BEAUTY_API_KEY',
-  //     'X-RapidAPI-Host': 'ai-face-slimming.p.rapidapi.com'
-  //   },
-  //   data: data
-  // };
+    const options = {
+      method: 'POST',
+      url: 'https://ai-skin-beauty.p.rapidapi.com/face/editing/retouch-skin',
+      headers: {
+        'X-RapidAPI-Key': BEAUTY_API_KEY,
+        'X-RapidAPI-Host': 'ai-skin-beauty.p.rapidapi.com',
+      },
+      data,
+    };
 
-  // axios.request(options).then(function (response) {
-  //   console.log(response.data);
-  // }).catch(function (error) {
-  //   console.error(error);
-  // });
-  // }
+    axios
+      .request(options)
+      .then((response) => {
+        // console.log(response.data);
 
+        // console.log(response.data.data.image_url);
+        const fullImageURL = response.data.data.image_url;
+        const fetchImageURL = fullImageURL.substring(41);
+        // console.log(fetchImageURL);
+        fetchImage(fetchImageURL);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const handleOnChangeBySlim = (event: ChangeEvent<HTMLInputElement>) => {
+    // console.log(faceImage)
+    // console.log(faceSrc)
+
+    const rangeValue: string = event.target.value;
+    if (+rangeValue > 0) {
+      setIsCheckBtn(true);
+      setSlimValue(rangeValue);
+    }
+    // console.log(rangeValue);
+
+    const degree: string = (+rangeValue / 50).toString();
+
+    /* 슬리밍 기능 */
+    const data = new FormData();
+    data.append('image', faceImage as Blob);
+    data.append('slim_degree', degree);
+
+    const options = {
+      method: 'POST',
+      url: 'https://ai-face-slimming.p.rapidapi.com/face/editing/liquify-face',
+      headers: {
+        'X-RapidAPI-Key': BEAUTY_API_KEY,
+        'X-RapidAPI-Host': 'ai-face-slimming.p.rapidapi.com',
+      },
+      data,
+    };
+
+    axios
+      .request(options)
+      .then((response) => {
+        // console.log(response.data);
+        // console.log(response.data.data.image_url);
+        const fullImageURL = response.data.data.image_url;
+        const fetchImageURL = fullImageURL.substring(41);
+        // console.log(fetchImageURL);
+        fetchImage(fetchImageURL);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
   const onClickHandler = (idx: number) => {
     if (activeType !== idx) {
       setActiveType(idx);
+      setSelectType(idx);
     }
+  };
+
+  const checkHandler = () => {
+    if (selectType === 0) {
+      setSkinValue('0');
+    } else if (selectType === 1) {
+      setSlimValue('0');
+    }
+    setFaceImage(retouchImageTmp);
+    setIsCheckBtn(false);
   };
 
   useEffect(() => {
     setActiveType(0);
+    setSelectType(0);
+    setIsCheckBtn(false);
   }, []);
 
   useEffect(() => {
@@ -98,13 +167,20 @@ const PhotoRetouch: NextPage = () => {
       <Header
         title="사진 보정"
         href="/background-decision"
-        onClickButton={() => router.push('/photo-save')}
+        onClickButton={() => {
+          if (retouchImageTmp !== faceImage) setFaceImage(retouchImageTmp);
+          router.push('/photo-save');
+        }}
       />
 
       <main className={styles.main}>
         <div className={styles['face-image-container']}>
           <div className={styles['face-image']}>
-            <Image src={faceSrc} alt="얼굴 사진 결과물" layout="fill" />
+            <Image
+              src={retouchImageUrlTmp}
+              alt="얼굴 사진 결과물"
+              layout="fill"
+            />
           </div>
         </div>
         <article className={styles['select-container']}>
@@ -125,18 +201,30 @@ const PhotoRetouch: NextPage = () => {
           </section>
           <section>
             <h2 className={styles['screen-reader-only']}>보정하기</h2>
-            {/* eslint jsx-a11y/label-has-associated-control: ["error", { assert: "either" } ] */}
-            {/* <input type="file" id='fileInput' onChange={ handleOnChange}></input> */}
-            <label htmlFor="ratio">0</label>
-            <input
-              className={styles.ratio}
-              type="range"
-              name="ratio"
-              id="ratio"
-              min="0"
-              max="100"
-            />
-            <label htmlFor="ratio">100</label>
+            <div className={styles['ratio-container']}>
+              {selectType === 0 ? ( // selectType === 0 : 깨끗하게, selectType === 1 : 슬림하게
+                <SkinBeautyRange
+                  handleOnChange={handleOnChangeBySkin}
+                  skinValue={skinValue}
+                />
+              ) : (
+                <SlimmingRange
+                  handleOnChange={handleOnChangeBySlim}
+                  slimValue={slimValue}
+                />
+              )}
+            </div>
+            <div className={styles['btn-container']}>
+              {isCheckBtn ? (
+                <button
+                  className={styles.activeBtn}
+                  type="button"
+                  onClick={checkHandler}
+                >
+                  적용하기
+                </button>
+              ) : null}
+            </div>
           </section>
         </article>
       </main>
