@@ -28,28 +28,19 @@ const PhotoRetouch: NextPage = () => {
 
   const fetchImage = async (imageURL: string) => {
     const blob = await fetch(imageURL).then((res) => res.blob());
-
     setRetouchImageTmp(blob);
     setRetouchImageUrlTmp(URL.createObjectURL(blob));
-    // console.log(blob);
   };
 
+  /* 스킨 뷰티 기능 */
   const handleOnChangeBySkin = async (event: ChangeEvent<HTMLInputElement>) => {
-    // console.log(faceImage)
-    // console.log(faceSrc)
-
     const rangeValue: string = event.target.value;
     if (+rangeValue > 0) {
       setIsCheckBtn(true);
       setSkinValue(rangeValue);
     }
-    // console.log(rangeValue);
 
     const degree: string = (+rangeValue / 100).toString();
-    // console.log(degree);
-    // console.log(typeof degree);
-    
-    /* 스킨 뷰티 기능 */
     const data = new FormData();
     data.append('image', faceImage as Blob, 'photo.png');
     data.append('retouch_degree', degree);
@@ -68,12 +59,8 @@ const PhotoRetouch: NextPage = () => {
     axios
       .request(options)
       .then((response) => {
-        // console.log(response.data);
-
-        // console.log(response.data.data.image_url);
         const fullImageURL = response.data.data.image_url;
         const fetchImageURL = fullImageURL.substring(41);
-        // console.log(fetchImageURL);
         fetchImage(fetchImageURL);
       })
       .catch((error) => {
@@ -81,20 +68,15 @@ const PhotoRetouch: NextPage = () => {
       });
   };
 
+  /* 슬리밍 기능 */
   const handleOnChangeBySlim = (event: ChangeEvent<HTMLInputElement>) => {
-    // console.log(faceImage)
-    // console.log(faceSrc)
-
     const rangeValue: string = event.target.value;
     if (+rangeValue > 0) {
       setIsCheckBtn(true);
       setSlimValue(rangeValue);
     }
-    // console.log(rangeValue);
 
     const degree: string = (+rangeValue / 50).toString();
-
-    /* 슬리밍 기능 */
     const data = new FormData();
     data.append('image', faceImage as Blob);
     data.append('slim_degree', degree);
@@ -112,17 +94,15 @@ const PhotoRetouch: NextPage = () => {
     axios
       .request(options)
       .then((response) => {
-        // console.log(response.data);
-        // console.log(response.data.data.image_url);
         const fullImageURL = response.data.data.image_url;
         const fetchImageURL = fullImageURL.substring(41);
-        // console.log(fetchImageURL);
         fetchImage(fetchImageURL);
       })
       .catch((error) => {
         console.error(error);
       });
   };
+
   const onClickHandler = (idx: number) => {
     if (activeType !== idx) {
       setActiveType(idx);
