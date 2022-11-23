@@ -17,7 +17,7 @@ const SkinBeautyRange = ({ handleOnChange, skinValue }: IProps) => (
       id="ratio"
       min="0"
       max="150"
-      step={10}
+      step="10"
       value={skinValue}
       onChange={handleOnChange}
     />

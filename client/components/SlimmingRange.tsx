@@ -17,7 +17,7 @@ const SlimmingRange = ({ handleOnChange, slimValue }: IProps) => (
       id="ratio"
       min="0"
       max="100"
-      step={10}
+      step="10"
       value={slimValue}
       onChange={handleOnChange}
     />

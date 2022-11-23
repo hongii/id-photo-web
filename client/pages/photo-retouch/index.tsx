@@ -24,7 +24,8 @@ const PhotoRetouch: NextPage = () => {
   const [skinValue, setSkinValue] = useState('0');
   const [slimValue, setSlimValue] = useState('0');
   const [isCheckBtn, setIsCheckBtn] = useState(false);
-  const BEAUTY_API_KEY = process.env.NEXT_PUBLIC_BEAUTY_API_KEY;
+  // const BEAUTY_API_KEY = process.env.NEXT_PUBLIC_BEAUTY_API_KEY; // 실제 api 호출하려면 주석 풀기
+  const FAKE_API_KEY = process.env.NEXT_PUBLIC_FAKE_API_KEY;
 
   const fetchImage = async (imageURL: string) => {
     const blob = await fetch(imageURL).then((res) => res.blob());
@@ -35,10 +36,15 @@ const PhotoRetouch: NextPage = () => {
   /* 스킨 뷰티 기능 */
   const handleOnChangeBySkin = async (event: ChangeEvent<HTMLInputElement>) => {
     const rangeValue: string = event.target.value;
-    if (+rangeValue > 0) {
-      setIsCheckBtn(true);
-      setSkinValue(rangeValue);
+    if (+rangeValue === 0 && skinValue === '0') return;
+
+    if (+rangeValue === 0 && skinValue !== '0') {
+      setIsCheckBtn(false);
     }
+    else {
+      setIsCheckBtn(true);
+    }
+    setSkinValue(rangeValue);
 
     const degree: string = (+rangeValue / 100).toString();
     const data = new FormData();
@@ -50,7 +56,7 @@ const PhotoRetouch: NextPage = () => {
       method: 'POST',
       url: 'https://ai-skin-beauty.p.rapidapi.com/face/editing/retouch-skin',
       headers: {
-        'X-RapidAPI-Key': BEAUTY_API_KEY,
+        'X-RapidAPI-Key': FAKE_API_KEY, // 실제로 api 호출하려면, BEAUTY_API_KEY로 바꿔넣기
         'X-RapidAPI-Host': 'ai-skin-beauty.p.rapidapi.com',
       },
       data,
@@ -71,10 +77,15 @@ const PhotoRetouch: NextPage = () => {
   /* 슬리밍 기능 */
   const handleOnChangeBySlim = (event: ChangeEvent<HTMLInputElement>) => {
     const rangeValue: string = event.target.value;
-    if (+rangeValue > 0) {
-      setIsCheckBtn(true);
-      setSlimValue(rangeValue);
+    if (+rangeValue === 0 && slimValue === '0') return;
+    
+    if (+rangeValue === 0 && slimValue !== '0') {
+      setIsCheckBtn(false);
     }
+    else {
+      setIsCheckBtn(true);
+    }
+    setSlimValue(rangeValue);
 
     const degree: string = (+rangeValue / 50).toString();
     const data = new FormData();
@@ -85,7 +96,7 @@ const PhotoRetouch: NextPage = () => {
       method: 'POST',
       url: 'https://ai-face-slimming.p.rapidapi.com/face/editing/liquify-face',
       headers: {
-        'X-RapidAPI-Key': BEAUTY_API_KEY,
+        'X-RapidAPI-Key': FAKE_API_KEY,// 실제로 api 호출하려면, BEAUTY_API_KEY로 바꿔넣기
         'X-RapidAPI-Host': 'ai-face-slimming.p.rapidapi.com',
       },
       data,
@@ -105,8 +116,10 @@ const PhotoRetouch: NextPage = () => {
 
   const onClickHandler = (idx: number) => {
     if (activeType !== idx) {
-      setActiveType(idx);
-      setSelectType(idx);
+      if ((idx === 0 && slimValue === '0') || idx === 1 && skinValue === '0'){
+        setActiveType(idx);
+        setSelectType(idx);
+      }
     }
   };
 
@@ -203,7 +216,9 @@ const PhotoRetouch: NextPage = () => {
                 >
                   적용하기
                 </button>
-              ) : null}
+              ) :
+                <div className={styles.hiddenBtn}/>
+              }
             </div>
           </section>
         </article>
