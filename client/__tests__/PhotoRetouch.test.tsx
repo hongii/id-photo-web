@@ -58,7 +58,7 @@ describe('Photo Retouch Page', () => {
 
     const list = screen.getByRole('list', { name: /종류 목록/ });
     const listItems = screen.getAllByRole('listitem', { name: /type item/ });
-    const names = ['미백', '갸름하게'];
+    const names = ['깨끗하게', '슬림하게'];
     listItems.forEach((listItem, idx) => {
       expect(list).toContainElement(listItem);
       expect(listItem).toContainElement(
