@@ -6,8 +6,7 @@ async function fetchBgRemovedImage(photo: Blob | File) {
     const response = await fetch('/clip/remove-background/v1', {
       method: 'POST',
       headers: {
-        'x-api-key':
-          'a01e71c5ca56f715cfcc5233ef967007f30a67eea3c1e10b16bd637039f34c2001f7a04e472caf6f0a18292d0472920a',
+        'x-api-key': process.env.NEXT_PUBLIC_CLIP_API_KEY as string,
       },
       body: form,
     });
