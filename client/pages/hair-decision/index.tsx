@@ -6,10 +6,15 @@ import Header from '@/components/Header';
 import styles from '@/styles/HairDecision.module.css';
 import TypeList from '@/components/TypeList';
 import HairStyleList from '@/components/HairStyleList';
+import Loading from '@/components/Loading';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import faceImageState, { withSrc } from 'recoil/faceImage';
 import noBgPhotoAtom from 'recoil/noBgPhotoAtom';
 import { useRouter } from 'next/router';
+import useFetch from 'services/useFetch';
+import uuid from 'react-uuid';
+import { mockFetchBgRemovedImage } from 'services/clipdrop';
+import ganPhotoAtom from 'recoil/ganPhotoAtom';
 import { hairStyleImages, typeNames } from '../../constants/hairStyleData';
 
 const HairDecision: NextPage = () => {
@@ -17,9 +22,19 @@ const HairDecision: NextPage = () => {
   const [selectedHair, setSelectedHair] = useState(-1);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [faceImage, setFaceImage] = useRecoilState(faceImageState);
-  const [, setNoBgPhoto] = useRecoilState(noBgPhotoAtom);
+  const [noBgPhoto, setNoBgPhoto] = useRecoilState(noBgPhotoAtom);
+  const [, setGanPhoto] = useRecoilState(ganPhotoAtom);
   const faceSrc = useRecoilValue(withSrc);
   const router = useRouter();
+  const { data, error, loading } = useFetch<{ image: Blob }>({
+    body: noBgPhoto,
+    interval: 3000,
+    enabled: !noBgPhoto,
+    shouldRetry: (cnt) => cnt < 1,
+    // 배경 제거 기능 확인을 원하면 아래로 수정할 것
+    // api: () => fetchBgRemovedImage(faceImage as File),
+    api: () => mockFetchBgRemovedImage(faceImage as Blob, false),
+  });
 
   const toBlob = async (canvas: HTMLCanvasElement) =>
     new Promise<Blob>((resolve) => {
@@ -27,18 +42,6 @@ const HairDecision: NextPage = () => {
         resolve(blob as Blob);
       });
     });
-
-  const handleComplete = async () => {
-    if (!canvasRef.current) return;
-
-    const croppedFace = await toBlob(canvasRef.current);
-    if (faceSrc) {
-      URL.revokeObjectURL(faceSrc);
-    }
-    setFaceImage(croppedFace);
-    setNoBgPhoto('');
-    router.push('/cut-size-decision');
-  };
 
   const handleSelectHair = (idx: number) => {
     if (idx === selectedHair) {
@@ -49,62 +52,126 @@ const HairDecision: NextPage = () => {
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleUploadImage = async () => {
-    const responseOfPresignedURL = await fetch(
-      `/aws/prod/sr/presignedurlforupload`,
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          method: 'PUT',
-          fileName: `user_image`,
-        }),
+  const handleUploadImage = async (file: Blob) => {
+    try {
+      const id = uuid();
+      console.log('uuid', id);
+
+      const hairType = hairStyleImages[typeNames[activeType]][selectedHair]
+        .replace('/images/', '')
+        .replace(/(.webp)|(.jpg)|(.png)/, '');
+      console.log('hairType', hairType);
+
+      const responseOfPresignedURL = await fetch(
+        `/aws/prod/sr/presignedurlforupload`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            method: 'PUT',
+            fileName: `barbershop/${id}/man_face_1.png`,
+            hairType,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      console.log('Pre:', responseOfPresignedURL);
+      const presignedURL = await responseOfPresignedURL.text();
+
+      const newNameImg = new File(
+        [file as Blob],
+        `barbershop/${id}/man_face_1`,
+        {
+          type: 'image/png',
+        }
+      );
+      console.log('File:', newNameImg.name, newNameImg.type);
+      const uri = presignedURL.replace(
+        'https://sweetndata-barbershop.s3.amazonaws.com/',
+        ''
+      );
+      const result = await fetch(`/s3/${uri}`.replaceAll(/"|(%22)/gi, ''), {
+        method: 'PUT',
+        body: newNameImg,
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': newNameImg.type,
         },
+      });
+      console.log('PUT:', result);
+      if (!result.ok) {
+        throw new Error('PUT failed');
       }
-    );
-    const presignedURL = await responseOfPresignedURL.text();
 
-    const newNameImg = new File([faceImage as Blob], 'user_image', {
-      type: (faceImage as Blob).type,
-    });
+      const responseOfGetImage = await fetch(
+        `/aws/prod/sr/presignedurlforupload`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            method: 'GET',
+            fileName: `barbershop/${id}/man_face_1.png`,
+            hairType,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      const resultImageURL = await responseOfGetImage.text();
 
-    const uri = presignedURL.replace(
-      'https://sweetndata-barbershop.s3.amazonaws.com/',
-      ''
-    );
-    const result = await fetch(`/s3/${uri}`.replaceAll(/"|(%22)/gi, ''), {
-      method: 'PUT',
-      body: newNameImg,
-      headers: {
-        'Content-Type': newNameImg.type,
-      },
-    });
+      // eslint-disable-next-line no-console
+      console.log('GET:', resultImageURL);
 
-    if (!result.ok) {
+      const responseOfGetGANImage = await fetch(
+        `/aws/prod/sr/presignedurlforupload`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            method: 'GET',
+            fileName: `barbershop/${id}/output.png`,
+            hairType,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      const ganImageURL = await responseOfGetGANImage.text();
+
+      // eslint-disable-next-line no-console
+      console.log('GAN:', ganImageURL);
+
+      setGanPhoto(ganImageURL);
+
+      router.push('/cut-size-decision');
+    } catch (e) {
       // eslint-disable-next-line no-alert
-      alert('s3 upload fail');
-      router.push('/');
+      alert('업로드를 실패했습니다. 다시 시도해주세요.');
+      // eslint-disable-next-line no-console
+      console.error(e);
     }
-
-    const responseOfGetImage = await fetch(
-      `/aws/prod/sr/presignedurlforupload`,
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          method: 'GET',
-          fileName: `user_image`,
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    const resultImageURL = await responseOfGetImage.text();
-
-    // eslint-disable-next-line no-console
-    console.log(resultImageURL);
   };
+
+  const handleComplete = async () => {
+    if (!canvasRef.current) return;
+
+    const croppedFace = await toBlob(canvasRef.current);
+    if (faceSrc) {
+      URL.revokeObjectURL(faceSrc);
+    }
+    setFaceImage(croppedFace);
+    handleUploadImage(croppedFace);
+  };
+
+  useEffect(() => {
+    if (data) {
+      setNoBgPhoto(URL.createObjectURL(data.image));
+    }
+  }, [data, setNoBgPhoto]);
+
+  useEffect(() => {
+    setSelectedHair(-1);
+  }, [activeType]);
 
   useEffect(() => {
     if (faceSrc === '/') {
@@ -112,9 +179,9 @@ const HairDecision: NextPage = () => {
     }
   }, [faceSrc, router]);
 
-  useEffect(() => {
-    setSelectedHair(-1);
-  }, [activeType]);
+  if (error) {
+    return <div>배경 제거 과정에서 오류가 발생했습니다</div>;
+  }
 
   return (
     <div className={styles.page}>
@@ -136,7 +203,7 @@ const HairDecision: NextPage = () => {
       <main className={styles.main}>
         <article>
           <h2 className={styles['screen-reader-only']}>사진 조정</h2>
-          <Crop faceSrc={faceSrc} ref={canvasRef} />
+          <Crop faceSrc={noBgPhoto || '/'} ref={canvasRef} />
         </article>
         <article className={styles['select-container']}>
           <section>
@@ -159,6 +226,7 @@ const HairDecision: NextPage = () => {
           </section>
         </article>
       </main>
+      <Loading isDone={loading === false} time={3000} />
     </div>
   );
 };

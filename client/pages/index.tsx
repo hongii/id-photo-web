@@ -5,11 +5,13 @@ import Image from 'next/image';
 import faceImageState, { withSrc } from 'recoil/faceImage';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { useRouter } from 'next/router';
+import noBgPhotoAtom from 'recoil/noBgPhotoAtom';
 import styles from '../styles/Home.module.css';
 
 const Home: NextPage = () => {
   const [, setFaceImage] = useRecoilState(faceImageState);
   const faceSrc = useRecoilValue(withSrc);
+  const [noBgPhoto, setNoBgPhoto] = useRecoilState(noBgPhotoAtom);
   const router = useRouter();
 
   const handleUploadPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -18,7 +20,11 @@ const Home: NextPage = () => {
       if (faceSrc) {
         URL.revokeObjectURL(faceSrc);
       }
+      if (noBgPhoto) {
+        URL.revokeObjectURL(noBgPhoto);
+      }
       setFaceImage(faceFile);
+      setNoBgPhoto('');
       router.push('/hair-decision');
     }
   };
