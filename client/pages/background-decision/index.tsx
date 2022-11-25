@@ -8,10 +8,11 @@ import ColorList from '@/components/ColorList';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import faceImageState, { withSrc } from 'recoil/faceImage';
 import { useRouter } from 'next/router';
+import ganPhotoAtom from 'recoil/ganPhotoAtom';
 import Loading from '@/components/Loading';
 import useFetch from 'services/useFetch';
-import { mockFetchBgRemovedImage } from 'services/clipdrop';
-import noBgPhotoAtom from 'recoil/noBgPhotoAtom';
+import { mockFetchGANImage } from 'services/barbershop';
+import debounce from 'utils/debounce';
 
 const typeNames = ['단색', '그라데이션'];
 const colorOptions: { [key: string]: string[] } = {
@@ -28,17 +29,17 @@ const BackgroundDecision: NextPage = () => {
   const [activeType, setActiveType] = useState(0);
   const [activeColor, setActiveColor] = useState('');
   const faceSrc = useRecoilValue(withSrc);
-  const [faceImage, setFaceImage] = useRecoilState(faceImageState);
+  const [, setFaceImage] = useRecoilState(faceImageState);
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [noBgPhoto, setNoBgPhoto] = useRecoilState(noBgPhotoAtom);
-  const { data, error, loading } = useFetch<{ image: Blob }>({
-    body: noBgPhoto,
-    interval: 3000,
-    enabled: !noBgPhoto,
-    shouldRetry: (cnt) => cnt < 1,
-    // 배경 제거 기능 확인을 원하면 api: () => fetchBgRemovedImage(faceImage as Blob)로 수정할 것
-    api: () => mockFetchBgRemovedImage(faceImage as Blob, false),
+  const [ganPhoto] = useRecoilState(ganPhotoAtom);
+  const { data, loading } = useFetch<{ src: string }>({
+    interval: 6000,
+    enabled: true,
+    body: ganPhoto,
+    shouldRetry: (cnt) => cnt < 100,
+    // 실제 실행 시 () => fetchGANImage(ganPhoto)로 변경
+    api: mockFetchGANImage(1, faceSrc),
   });
 
   const drawImageToCanvas: (src: string) => void = useCallback(
@@ -48,6 +49,7 @@ const BackgroundDecision: NextPage = () => {
         if (canvasRef.current) {
           const ctx = canvasRef.current.getContext('2d');
           const { width, height } = canvasRef.current;
+
           if (!ctx) return;
 
           ctx.clearRect(0, 0, width, height);
@@ -69,29 +71,23 @@ const BackgroundDecision: NextPage = () => {
             }
             ctx.fillRect(0, 0, width, height);
           }
-          ctx.drawImage(img, 0, 0, width, height);
+          ctx.drawImage(
+            img,
+            0,
+            0,
+            img.naturalWidth,
+            img.naturalHeight,
+            0,
+            0,
+            width,
+            height
+          );
         }
       };
       img.src = src;
     },
     [activeColor, activeType]
   );
-
-  useEffect(() => {
-    if (noBgPhoto) drawImageToCanvas(noBgPhoto);
-  }, [noBgPhoto, drawImageToCanvas]);
-
-  useEffect(() => {
-    if (data) {
-      setNoBgPhoto(URL.createObjectURL(data.image));
-    }
-  }, [data, setNoBgPhoto]);
-
-  useEffect(() => {
-    if (faceSrc === '/') {
-      router.push('/');
-    }
-  }, [faceSrc, router]);
 
   const handleChangeType = (idx: number) => {
     setActiveType(idx);
@@ -117,7 +113,27 @@ const BackgroundDecision: NextPage = () => {
     router.push('/photo-retouch');
   };
 
-  if (error) return <div>Error</div>;
+  useEffect(() => {
+    if (canvasRef.current) {
+      const dpr = window.devicePixelRatio;
+      canvasRef.current.width *= dpr;
+      canvasRef.current.height *= dpr;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!data) {
+      drawImageToCanvas(faceSrc);
+    } else {
+      drawImageToCanvas(data.src);
+    }
+  }, [faceSrc, drawImageToCanvas, data]);
+
+  useEffect(() => {
+    if (faceSrc === '/') {
+      router.push('/');
+    }
+  }, [faceSrc, router]);
 
   return (
     <div className={styles['page-layout']}>
@@ -151,7 +167,7 @@ const BackgroundDecision: NextPage = () => {
             <TypeList
               typeNames={typeNames}
               activeTarget={activeType}
-              onClick={handleChangeType}
+              onClick={debounce(handleChangeType, 500)}
             />
           </section>
           <section>
@@ -159,13 +175,13 @@ const BackgroundDecision: NextPage = () => {
             <ColorList
               activeTarget={activeColor}
               colors={colorOptions[typeNames[activeType]]}
-              onClick={setActiveColor}
+              onClick={debounce(setActiveColor, 500)}
               isGradient={typeNames[activeType] === '그라데이션'}
             />
           </section>
         </article>
       </main>
-      <Loading isDone={loading === false} time={3000} />
+      <Loading isDone={loading === false} time={1000 * 60 * 10} />
     </div>
   );
 };
