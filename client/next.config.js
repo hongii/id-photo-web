@@ -17,7 +17,7 @@ const nextConfig = {
         destination: `https://sweetndata-barbershop.s3.amazonaws.com/:path*`,
       },
       {
-        source: '/:path*',
+        source: '/retouch/:path*',
         destination: `https://ai-result-rapidapi.ailabtools.com/:path*`,
       },
     ];

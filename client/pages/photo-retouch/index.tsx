@@ -33,7 +33,7 @@ const PhotoRetouch: NextPage = () => {
   const FAKE_API_KEY = process.env.NEXT_PUBLIC_FAKE_API_KEY;
 
   const fetchImage = async (imageURL: string) => {
-    const blob = await fetch(imageURL).then((res) => res.blob());
+    const blob = await fetch(`/retouch${imageURL}`).then((res) => res.blob());
     setRetouchImageTmp(blob);
     setRetouchImageUrlTmp(URL.createObjectURL(blob));
   };
@@ -68,7 +68,7 @@ const PhotoRetouch: NextPage = () => {
   };
 
   const postSlim = () => {
-    const degree: string = (+rangeValue / 50).toString();
+    const degree: string = (+rangeValue[1] / 50).toString();
     const data = new FormData();
     data.append('image', faceImage as Blob);
     data.append('slim_degree', degree);
