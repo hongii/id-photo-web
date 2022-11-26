@@ -7,7 +7,6 @@ import RetouchTypes from '@/components/RetouchTypes';
 import { useRouter } from 'next/router';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import faceImageState, { withSrc } from 'recoil/faceImage';
-import axios from 'axios';
 import SkinBeautyRange from '@/components/SkinBeautyRange';
 import SlimmingRange from '@/components/SlimmingRange';
 import useDebounce from '../../hooks/useDebounce';
@@ -33,66 +32,64 @@ const PhotoRetouch: NextPage = () => {
   const FAKE_API_KEY = process.env.NEXT_PUBLIC_FAKE_API_KEY;
 
   const fetchImage = async (imageURL: string) => {
-    const blob = await fetch(imageURL).then((res) => res.blob());
+    const blob = await fetch(`/retouch${imageURL}`).then((res) => res.blob());
     setRetouchImageTmp(blob);
     setRetouchImageUrlTmp(URL.createObjectURL(blob));
   };
 
-  const postSkin = () => {
-    const degree: string = (+rangeValue[0] / 100).toString();
-    const data = new FormData();
-    data.append('image', faceImage as Blob, 'photo.png');
-    data.append('retouch_degree', degree);
-    data.append('whitening_degree', degree);
+  const postSkin = async () => {
+    try {
+      const degree: string = (+rangeValue[0] / 100).toString();
+      const data = new FormData();
+      data.append('image', faceImage as Blob, 'photo.png');
+      data.append('retouch_degree', degree);
+      data.append('whitening_degree', degree);
 
-    const options = {
-      method: 'POST',
-      url: 'https://ai-skin-beauty.p.rapidapi.com/face/editing/retouch-skin',
-      headers: {
-        'X-RapidAPI-Key': FAKE_API_KEY, // 실제 api 호출하려면 BEAUTY_API_KEY로 바꿔넣기
-        'X-RapidAPI-Host': 'ai-skin-beauty.p.rapidapi.com',
-      },
-      data,
-    };
-
-    axios
-    .request(options)
-    .then((response) => {
-      const fullImageURL = response.data.data.image_url;
+      const options = {
+        method: 'POST',
+        headers : {
+          'X-RapidAPI-Key': FAKE_API_KEY as string, // 실제 api 호출하려면 BEAUTY_API_KEY로 바꿔넣기
+          'X-RapidAPI-Host': 'ai-skin-beauty.p.rapidapi.com',
+        },
+        body : data,
+      };
+      
+      const response = await (await (fetch("/retouch-skin", options))).json();
+    
+      const fullImageURL = response.data.image_url;
       const fetchImageURL = fullImageURL.substring(41);
       fetchImage(fetchImageURL);
-    })
-    .catch((error) => {
+
+    } catch (error) {
       global.console.error(error);
-    });
+    }
   };
 
-  const postSlim = () => {
-    const degree: string = (+rangeValue / 50).toString();
-    const data = new FormData();
-    data.append('image', faceImage as Blob);
-    data.append('slim_degree', degree);
+  const postSlim = async() => {
+    try {
+      const degree: string = (+rangeValue[1] / 50).toString();
+      const data = new FormData();
+      data.append('image', faceImage as Blob);
+      data.append('slim_degree', degree);
 
-    const options = {
-      method: 'POST',
-      url: 'https://ai-face-slimming.p.rapidapi.com/face/editing/liquify-face',
-      headers: {
-        'X-RapidAPI-Key': FAKE_API_KEY, // 실제 api 호출하려면 BEAUTY_API_KEY로 바꿔넣기
-        'X-RapidAPI-Host': 'ai-face-slimming.p.rapidapi.com',
-      },
-      data,
-    };
+      const options = {
+        method: 'POST',
+        headers: {
+          'X-RapidAPI-Key': FAKE_API_KEY as string, // 실제 api 호출하려면 BEAUTY_API_KEY로 바꿔넣기
+          'X-RapidAPI-Host': 'ai-face-slimming.p.rapidapi.com',
+        },
+        body : data,
+      };
 
-    axios
-      .request(options)
-      .then((response) => {
-        const fullImageURL = response.data.data.image_url;
-        const fetchImageURL = fullImageURL.substring(41);
-        fetchImage(fetchImageURL);
-      })
-      .catch((error) => {
-        global.console.error(error);
-      });
+      const response = await (await (fetch("/retouch-slim", options))).json();
+    
+      const fullImageURL = response.data.image_url;
+      const fetchImageURL = fullImageURL.substring(41);
+      fetchImage(fetchImageURL);
+
+    } catch (error) {
+      global.console.error(error);
+    }
   };
 
   /* 스킨 뷰티 기능 */
