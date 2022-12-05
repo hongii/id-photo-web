@@ -9,7 +9,7 @@ export default function App() {
   //     <StatusBar style="auto" />
   //   </View>
   // );
-  return <WebView source={{ uri: 'https://www.naver.com/' }} />;
+  return <WebView source={{ uri: 'https://id-photo-web.vercel.app/' }} />;
 }
 
 const styles = StyleSheet.create({

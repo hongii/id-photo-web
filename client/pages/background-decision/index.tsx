@@ -115,9 +115,11 @@ const BackgroundDecision: NextPage = () => {
 
   useEffect(() => {
     if (canvasRef.current) {
-      const dpr = window.devicePixelRatio;
-      canvasRef.current.width *= dpr;
-      canvasRef.current.height *= dpr;
+      const { offsetWidth } = canvasRef.current.parentElement || {
+        offsetWidth: 300,
+      };
+      canvasRef.current.width = offsetWidth;
+      canvasRef.current.height = Math.floor(offsetWidth / 3) * 4;
     }
   }, []);
 

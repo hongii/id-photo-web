@@ -6,7 +6,7 @@ import styles from '../pages/cut-size-decision/CutSizeDecision.module.css';
 // Image src array
 const imgSrc: string[] = [
   '/images/passportImg1.png',
-  '/images/studentIdImg2.png',
+  '/images/studentIDImg2.png',
   '/images/employeeIDImg3.png',
   '/images/visaImg4.png',
   '/images/visaImg4.png',
