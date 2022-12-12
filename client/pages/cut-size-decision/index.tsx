@@ -9,7 +9,12 @@ import Header from '@/components/Header';
 import { useRouter } from 'next/router';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import imgRatioState from 'recoil/imgRatio';
-import { withSrc } from 'recoil/faceImage';
+import faceImageState, { withSrc } from 'recoil/faceImage';
+import ganPhotoAtom from 'recoil/ganPhotoAtom';
+import useFetch from 'services/useFetch';
+import { fetchGANImage } from 'services/barbershop';
+import Loading from '@/components/Loading';
+import resultAtom from 'recoil/resultAtom';
 import styles from './CutSizeDecision.module.css';
 import Card from '../../components/Card';
 import { CardInfo, cutSizeData } from '../../constants/cutSizeData';
@@ -21,16 +26,44 @@ const CutSizeDecision: NextPage = () => {
   const faceSrc = useRecoilValue(withSrc);
   const router = useRouter();
 
+  const [faceImage] = useRecoilState(faceImageState);
+  const [ganPhoto] = useRecoilState(ganPhotoAtom);
+  const [, setResult] = useRecoilState(resultAtom);
+  const { data, loading } = useFetch<{ src: string }>({
+    interval: 6000,
+    enabled: true,
+    body: ganPhoto,
+    shouldRetry: (cnt) => cnt < 100,
+    api: () => fetchGANImage(ganPhoto),
+  });
+
   useEffect(() => {
     if (faceSrc === '/') {
       router.push('/');
     }
   }, [faceSrc, router]);
 
-  const handleClick = (ratio: { width: number; height: number }) => () => {
-    setImgRatioState(ratio);
-    router.push('/background-decision');
-  };
+  const handleClick =
+    (ratio: { width: number; height: number }) => async () => {
+      if (data) {
+        const response = await fetch(
+          `/s3/${ganPhoto}`
+            .replace('https://sweetndata-barbershop.s3.amazonaws.com/', '')
+            .replaceAll(/"|(%22)/gi, ''),
+          { method: 'get' }
+        );
+        const blob = await response.blob();
+
+        if (!response || !blob) return;
+
+        setResult(blob);
+      } else {
+        setResult(faceImage);
+      }
+
+      setImgRatioState(ratio);
+      router.push('/background-decision');
+    };
 
   return (
     <div className={styles.container}>
@@ -96,6 +129,7 @@ const CutSizeDecision: NextPage = () => {
           `}</style>
         </section>
       </main>
+      <Loading isDone={loading === false} time={1000 * 60 * 10} />
     </div>
   );
 };

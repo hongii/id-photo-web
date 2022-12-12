@@ -13,7 +13,7 @@ import noBgPhotoAtom from 'recoil/noBgPhotoAtom';
 import { useRouter } from 'next/router';
 import useFetch from 'services/useFetch';
 import uuid from 'react-uuid';
-import { mockFetchBgRemovedImage } from 'services/clipdrop';
+import { fetchBgRemovedImage } from 'services/clipdrop';
 import ganPhotoAtom from 'recoil/ganPhotoAtom';
 import { hairStyleImages, typeNames } from '../../constants/hairStyleData';
 
@@ -32,15 +32,15 @@ const HairDecision: NextPage = () => {
     enabled: !noBgPhoto,
     shouldRetry: (cnt) => cnt < 1,
     // 배경 제거 기능 확인을 원하면 아래로 수정할 것
-    // api: () => fetchBgRemovedImage(faceImage as File),
-    api: () => mockFetchBgRemovedImage(faceImage as Blob, false),
+    api: () => fetchBgRemovedImage(faceImage as File),
+    // api: () => mockFetchBgRemovedImage(faceImage as Blob, false),
   });
 
   const toBlob = async (canvas: HTMLCanvasElement) =>
     new Promise<Blob>((resolve) => {
       canvas.toBlob((blob) => {
         resolve(blob as Blob);
-      });
+      }, 'image/jpeg');
     });
 
   const handleSelectHair = (idx: number) => {
@@ -68,8 +68,7 @@ const HairDecision: NextPage = () => {
           method: 'POST',
           body: JSON.stringify({
             method: 'PUT',
-            fileName: `barbershop/${id}/man_face_1.png`,
-            hairType,
+            fileName: `barbershop/${id}/${hairType}.jpg`,
           }),
           headers: {
             'Content-Type': 'application/json',
@@ -81,9 +80,9 @@ const HairDecision: NextPage = () => {
 
       const newNameImg = new File(
         [file as Blob],
-        `barbershop/${id}/man_face_1`,
+        `barbershop/${id}/${hairType}`,
         {
-          type: 'image/png',
+          type: 'image/jpg',
         }
       );
       console.log('File:', newNameImg.name, newNameImg.type);
@@ -109,8 +108,7 @@ const HairDecision: NextPage = () => {
           method: 'POST',
           body: JSON.stringify({
             method: 'GET',
-            fileName: `barbershop/${id}/man_face_1.png`,
-            hairType,
+            fileName: `barbershop/${id}/${hairType}.jpg`,
           }),
           headers: {
             'Content-Type': 'application/json',
@@ -129,7 +127,6 @@ const HairDecision: NextPage = () => {
           body: JSON.stringify({
             method: 'GET',
             fileName: `barbershop/${id}/output.png`,
-            hairType,
           }),
           headers: {
             'Content-Type': 'application/json',
@@ -156,6 +153,7 @@ const HairDecision: NextPage = () => {
     if (!canvasRef.current) return;
 
     const croppedFace = await toBlob(canvasRef.current);
+
     if (faceSrc) {
       URL.revokeObjectURL(faceSrc);
     }

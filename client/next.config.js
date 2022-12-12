@@ -21,7 +21,15 @@ const nextConfig = {
         destination: `https://clipdrop-api.co/:path*`,
       },
       {
-        source: '/:path*',
+        source: '/retouch-skin',
+        destination: `https://ai-skin-beauty.p.rapidapi.com/face/editing/retouch-skin`,
+      },
+      {
+        source: '/retouch-slim',
+        destination: `https://ai-face-slimming.p.rapidapi.com/face/editing/liquify-face`,
+      },
+      {
+        source: '/retouch/:path*',
         destination: `https://ai-result-rapidapi.ailabtools.com/:path*`,
       },
     ];

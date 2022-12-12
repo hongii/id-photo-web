@@ -8,11 +8,12 @@ import ColorList from '@/components/ColorList';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import faceImageState, { withSrc } from 'recoil/faceImage';
 import { useRouter } from 'next/router';
-import ganPhotoAtom from 'recoil/ganPhotoAtom';
 import Loading from '@/components/Loading';
 import useFetch from 'services/useFetch';
-import { mockFetchGANImage } from 'services/barbershop';
 import debounce from 'utils/debounce';
+import removeBgResultAtom from 'recoil/removeBgResultAtom';
+import resultAtom from 'recoil/resultAtom';
+import { fetchBgRemovedImage } from 'services/clipdrop';
 
 const typeNames = ['단색', '그라데이션'];
 const colorOptions: { [key: string]: string[] } = {
@@ -32,14 +33,17 @@ const BackgroundDecision: NextPage = () => {
   const [, setFaceImage] = useRecoilState(faceImageState);
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [ganPhoto] = useRecoilState(ganPhotoAtom);
-  const { data, loading } = useFetch<{ src: string }>({
-    interval: 6000,
-    enabled: true,
-    body: ganPhoto,
-    shouldRetry: (cnt) => cnt < 100,
-    // 실제 실행 시 () => fetchGANImage(ganPhoto)로 변경
-    api: mockFetchGANImage(1, faceSrc),
+
+  const [result] = useRecoilState(resultAtom);
+  const [removeBgResult, setRemoveBgResult] =
+    useRecoilState(removeBgResultAtom);
+  const { data, error, loading } = useFetch<{ image: Blob }>({
+    body: removeBgResult,
+    interval: 3000,
+    enabled: !removeBgResult,
+    shouldRetry: (cnt) => cnt < 1,
+    // 배경 제거 기능 확인을 원하면 아래로 수정할 것
+    api: () => fetchBgRemovedImage(result as File),
   });
 
   const drawImageToCanvas: (src: string) => void = useCallback(
@@ -115,25 +119,38 @@ const BackgroundDecision: NextPage = () => {
 
   useEffect(() => {
     if (canvasRef.current) {
-      const dpr = window.devicePixelRatio;
-      canvasRef.current.width *= dpr;
-      canvasRef.current.height *= dpr;
+      const { offsetWidth } = canvasRef.current.parentElement || {
+        offsetWidth: 300,
+      };
+      canvasRef.current.width = offsetWidth;
+      canvasRef.current.height = Math.floor(offsetWidth / 3) * 4;
     }
   }, []);
 
   useEffect(() => {
-    if (!data) {
+    if (data) {
+      const url = URL.createObjectURL(data.image);
+      setRemoveBgResult(url);
+    }
+  }, [data, setRemoveBgResult]);
+
+  useEffect(() => {
+    if (!removeBgResult) {
       drawImageToCanvas(faceSrc);
     } else {
-      drawImageToCanvas(data.src);
+      drawImageToCanvas(removeBgResult);
     }
-  }, [faceSrc, drawImageToCanvas, data]);
+  }, [faceSrc, drawImageToCanvas, removeBgResult]);
 
   useEffect(() => {
     if (faceSrc === '/') {
       router.push('/');
     }
   }, [faceSrc, router]);
+
+  if (error) {
+    return <div>배경 제거 과정에서 오류가 발생했습니다</div>;
+  }
 
   return (
     <div className={styles['page-layout']}>
@@ -181,7 +198,7 @@ const BackgroundDecision: NextPage = () => {
           </section>
         </article>
       </main>
-      <Loading isDone={loading === false} time={1000 * 60 * 10} />
+      <Loading isDone={loading === false} time={3000} />
     </div>
   );
 };
